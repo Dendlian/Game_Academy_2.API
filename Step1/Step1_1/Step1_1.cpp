@@ -62,7 +62,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,                 /// 프로그램
     // 애플리케이션 초기화를 수행합니다:
     if (!InitInstance (hInstance, nCmdShow))
     {
-        return FALSE;
+        return FALSE;       // InitInstance가 거짓일 때 main문을 종료
     }
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_STEP11));
@@ -81,8 +81,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,                 /// 프로그램
 
     return (int) msg.wParam;
 }
-
-
 
 //
 //  함수: MyRegisterClass()
@@ -126,10 +124,29 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+   /*
+   ==NOTE==
+    // 콘솔창이 아닌 윈도우 창을 생성
+    // CreateWindowW : HWND을 반환
+    // HWND 
+      - 윈도우 콘솔창을 제어하는 공간은 콘솔창 자체의 공간과 별개로 따로 존재
+      - HWND는 콘솔창을 제어하는 공간의 주소값을 나타내는 핸들 
+   */
+   HWND hWnd = CreateWindowW(
+       szWindowClass,                   /// 윈도우 클래스 이름
+       szTitle,                         /// 타이틀바에 뛰울 이름
+       WS_OVERLAPPEDWINDOW,             /// 윈도우 스타일
+       CW_USEDEFAULT,                   /// 윈도우 화면의 좌표 X (CW_USEDEFAULT : 컴퓨터가 값을 임의로 생성)
+       0,                               /// 윈도우 화면의 좌표 Y
+       WINSIZEX,                        /// 윈도우 가로 사이즈
+       WINSIZEY,                        /// 윈도우 세로 사이즈
+       nullptr,                         /// 부모 윈도우 (사용X)
+       nullptr,                         /// 메뉴 핸들
+       hInstance,                       /// 인스턴스 지정
+       nullptr                          /// 자식 윈도우 (사용X)
+   );
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
-
+   /// hwnd가 제대로 생성되지 않았을 때 main문을 종료
    if (!hWnd)
    {
       return FALSE;
@@ -174,10 +191,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
         {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-            EndPaint(hWnd, &ps);
+            PAINTSTRUCT ps;                         /// ps : 그릴 수 있는 도구를 가지고 있는 구조체
+            HDC hdc = BeginPaint(hWnd, &ps);        /// 페인트 그리기를 시작하는 지점
+                                                    /// DC (Device Context) : 출력을 위한 모든 데이터를 가지는 구조체
+            /// 선 그리기       
+            /// MoveToEx : 선의 시작지점을 정하는 함수
+         
+            for (int LINEX = 0; LINEX < WINSIZEX; LINEX += 80)
+            {
+                MoveToEx(
+                    hdc,        /// 핸들
+                    LINEX,         /// X 좌표
+                    0,         /// Y 좌표
+                    NULL        /// 이전 포인터 값
+                );
+                LineTo(hdc, LINEX, WINSIZEY);
+            }
+            for (int LINEY = 0; LINEY < WINSIZEY; LINEY += 80)
+            {
+                MoveToEx(
+                    hdc,        /// 핸들
+                    0,         /// X 좌표
+                    LINEY,         /// Y 좌표
+                    NULL        /// 이전 포인터 값
+                );
+                LineTo(hdc, WINSIZEX, LINEY);
+            }
+
+            EndPaint(hWnd, &ps);                    /// 페인트 그리기를 종료하는 지점
         }
         break;
     case WM_DESTROY:

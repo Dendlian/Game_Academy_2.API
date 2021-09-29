@@ -22,5 +22,8 @@
 
 // L : w_char 형식으로 반환
 #define PROGRAM_TITLE L"송명근"
+#define WINSIZEX 1280
+#define WINSIZEY 720
+
 #include <string>
 using namespace std;
