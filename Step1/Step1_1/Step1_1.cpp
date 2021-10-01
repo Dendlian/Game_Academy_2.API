@@ -56,6 +56,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,                 /// 프로그램
     /// LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_STEP11, szWindowClass, MAX_LOADSTRING);
     
+    
     /// 창 클래스를 등록하는 부분
     MyRegisterClass(hInstance);
 
@@ -108,7 +109,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.lpszClassName  = szWindowClass;                                            /// 클래스 이름
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));     /// 작은 아이콘
 
-    return RegisterClassExW(&wcex);     /// 윈도우 클래스 등록
+    return RegisterClassExW(&wcex);     /// 윈도우 클래스 등록 (return 하는 이유 : ATOM이 반환값을 확인해서 생성이 잘 됐는지 확인)
+    // ATOM : 반환값을 컴퓨터 프로그램에 넘겨 클래스가 정상적으로 등록됐는지 확인 -> 문제 발생시 프로그램 중단
 }
 
 //
