@@ -18,10 +18,18 @@ API : 제공하는 함수의 집합체
 
 */
 
-// Step1_1.cpp : 애플리케이션에 대한 진입점을 정의합니다.
+
 
 #include "framework.h"
 #include "Step1_1.h"
+
+#pragma region H.W PRACTICE FUNCTION
+
+void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval);
+
+#pragma endregion
+
+
 
 /// 매크로 상수 : 최대 로드할 문자열 길이
 #define MAX_LOADSTRING 100
@@ -132,9 +140,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     // CreateWindowW : HWND을 반환
     // HWND 
       - 윈도우 콘솔창을 제어하는 공간은 콘솔창 자체의 공간과 별개로 따로 존재
-      - HWND는 콘솔창을 제어하는 공간의 주소값을 나타내는 핸들 
+      - HWND는 콘솔창을 제어하는 공간의 주소값을 나타내는 핸들
    */
-   HWND hWnd = CreateWindowW(
+   HWND hWnd = CreateWindowW(           /// 제대로 생성되지 않았다면 HWND는 nullpter (반환값 = 0)
        szWindowClass,                   /// 윈도우 클래스 이름
        szTitle,                         /// 타이틀바에 뛰울 이름
        WS_OVERLAPPEDWINDOW,             /// 윈도우 스타일
@@ -154,7 +162,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
       return FALSE;
    }
 
+   /// 윈도우 창 출력
    ShowWindow(hWnd, nCmdShow);
+   /// 업데이트
    UpdateWindow(hWnd);
 
    return TRUE;
@@ -199,32 +209,43 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             /// 선 그리기       
             /// MoveToEx : 선의 시작지점을 정하는 함수
          
-            for (int LINEX = 0; LINEX < WINSIZEX; LINEX += 80)
-            {
-                MoveToEx(
-                    hdc,        /// 핸들
-                    LINEX,         /// X 좌표
-                    0,         /// Y 좌표
-                    NULL        /// 이전 포인터 값
-                );
-                LineTo(hdc, LINEX, WINSIZEY);
-            }
-            for (int LINEY = 0; LINEY < WINSIZEY; LINEY += 80)
-            {
-                MoveToEx(
-                    hdc,        /// 핸들
-                    0,         /// X 좌표
-                    LINEY,         /// Y 좌표
-                    NULL        /// 이전 포인터 값
-                );
-                LineTo(hdc, WINSIZEX, LINEY);
-            }
+            //for (int LINEX = 0; LINEX < WINSIZEX; LINEX += 80)
+            //{
+            //    MoveToEx(
+            //        hdc,            /// 핸들
+            //        LINEX,          /// X 좌표
+            //        0,              /// Y 좌표
+            //        NULL            /// 이전 포인터 값
+            //    );
+            //    LineTo(hdc, LINEX, WINSIZEY);
+            //}
+            //for (int LINEY = 0; LINEY < WINSIZEY; LINEY += 80)
+            //{
+            //    MoveToEx(
+            //        hdc,           
+            //        0,             
+            //        LINEY,        
+            //        NULL           
+            //    );
+            //    LineTo(hdc, WINSIZEX, LINEY);
+            //}
+            //wstring wstr = L"창을 생성하였습니다.";
+
+            //TextOut(
+            //    hdc,
+            //    10,
+            //    10,
+            //    wstr.c_str(),   // c_str : C언어 형식으로 문자열을 변형
+            //    wstr.Lengthgth()
+            //    );
+
+            Draw_RE(hdc, 50, 50, 50, 10);
 
             EndPaint(hWnd, &ps);                    /// 페인트 그리기를 종료하는 지점
         }
         break;
     case WM_DESTROY:
-        PostQuitMessage(0);
+        PostQuitMessage(0); 
         break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
@@ -251,3 +272,36 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return (INT_PTR)FALSE;
 }
+
+
+// H.W 10.01
+void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval)
+{
+    int Line = 0;
+    for (int i = 0; i < 25; i++)
+    {
+        if (i % 5 == 0) Line++;
+        if (Line % 2 == 1)
+        {
+            Rectangle(
+                hdc, 
+                InitX + (i % 5) * (Length + Interval),                          // 왼쪽
+                InitY + (Line - 1) * (Length + Interval),                       // 위쪽
+                InitX + (i % 5) * (Length + Interval) + Length,                 // 오른쪽
+                InitY + (Line - 1) * (Length + Interval) + Length);             // 아래쪽
+        }
+        else
+        {
+            Ellipse(
+                hdc, 
+                InitX + (i % 5) * (Length + Interval), 
+                InitY + (Line - 1) * (Length + Interval), 
+                InitX + (i % 5) * (Length + Interval) + Length, 
+                InitY + (Line - 1) * (Length + Interval) + Length);
+        }
+    }
+}
+
+
+
+

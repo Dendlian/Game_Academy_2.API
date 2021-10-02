@@ -24,6 +24,7 @@
 #define PROGRAM_TITLE L"송명근"
 #define WINSIZEX 1280
 #define WINSIZEY 720
+#define UINT unsigned int
 
 #include <string>
 using namespace std;
