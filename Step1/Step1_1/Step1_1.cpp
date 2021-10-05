@@ -25,6 +25,7 @@ API : 제공하는 함수의 집합체
 
 #pragma region H.W PRACTICE FUNCTION
 
+void Draw_Plaid(HDC hdc, UINT Interval);
 void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval);
 
 #pragma endregion
@@ -38,6 +39,10 @@ void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval);
 HINSTANCE hInst;                                        /// 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING] = PROGRAM_TITLE;          /// 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];                    /// 기본 창 클래스 이름입니다.
+
+/// POINT : X와 Y좌표를 가지고 있는 구조체
+POINT   ptPos {0, 0};   /// 조작할 렉트의 좌표값
+RECT    rtBox1;         /// 조작할 렉트
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -113,7 +118,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_STEP11));         /// 아이콘
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);                           /// 마우스 커서
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);                                 /// 백그라운드의 색상
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_STEP11);                             /// 메뉴
+    wcex.lpszMenuName   = NULL;                                                     /// 메뉴
     wcex.lpszClassName  = szWindowClass;                                            /// 클래스 이름
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));     /// 작은 아이콘
 
@@ -134,6 +139,21 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+
+
+#pragma region 윈도우 창 생성시 화면의 중앙에 위치
+   // 윈도우 창이 생성될 때 정 중앙에 생성 : (모니터의 길이 - 윈도우 창의 길이) / 2
+   
+   // 사용중인 모니터 해상도의 X, Y사이즈를 반환
+   UINT nResolutionX = GetSystemMetrics(SM_CXSCREEN);
+   UINT nResolutionY = GetSystemMetrics(SM_CYSCREEN);
+
+   // 화면의 중앙위치
+   int nWinPosX = nResolutionX / 2 - WINSIZEX / 2;
+   int nWinPosY = nResolutionY / 2 - WINSIZEY / 2;
+#pragma endregion
+
+
    /*
    ==NOTE==
     // 콘솔창이 아닌 윈도우 창을 생성
@@ -146,8 +166,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
        szWindowClass,                   /// 윈도우 클래스 이름
        szTitle,                         /// 타이틀바에 뛰울 이름
        WS_OVERLAPPEDWINDOW,             /// 윈도우 스타일
-       CW_USEDEFAULT,                   /// 윈도우 화면의 좌표 X (CW_USEDEFAULT : 컴퓨터가 값을 임의로 생성)
-       0,                               /// 윈도우 화면의 좌표 Y
+       nWinPosX,                        /// 윈도우 화면의 좌표 X (CW_USEDEFAULT : 컴퓨터가 값을 임의로 생성)
+       nWinPosY,                        /// 윈도우 화면의 좌표 Y
        WINSIZEX,                        /// 윈도우 가로 사이즈
        WINSIZEY,                        /// 윈도우 세로 사이즈
        nullptr,                         /// 부모 윈도우 (사용X)
@@ -161,6 +181,29 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    {
       return FALSE;
    }
+
+#pragma region 좌표 나누기
+   /// 실제 창 사이즈를 rt에 보관
+   RECT rt = { nWinPosX, nWinPosY, nWinPosX + WINSIZEX, nWinPosY + WINSIZEY };
+
+   /// AdjustWindowRect() : 윈도우의 렉트를 조정하는 함수
+   AdjustWindowRect(
+       &rt,                         /// 보관할 렉트를 사용 
+       WS_OVERLAPPEDWINDOW,         /// 창을 만들 때의 스타일 옵션을 그대로 사용
+       false                        /// 메뉴를 사용 X
+   ); /// 타이틀 바를 제외한 부분의 크기를 설정
+
+   /// MoveWindow() : 윈도우 창 이동
+   MoveWindow(
+       hWnd,
+       rt.left,
+       rt.top,
+       rt.right - rt.left,
+       rt.bottom - rt.top,
+       true                          /// 윈도우 창을 다시 그리기
+   ); /// AdjustWindowRect에서 설정한 창을 다시 그리기
+#pragma endregion
+
 
    /// 윈도우 창 출력
    ShowWindow(hWnd, nCmdShow);
@@ -201,36 +244,60 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+
+    case WM_CREATE :
+        /// WM_CREATE : 프로그램이 실행될 때 한 번 호출 (초기화)
+        /// 타이머 설정
+        SetTimer
+        (
+            hWnd,
+            1,          /// Timer의 넘버를 구분해주는 매개변수
+            10,         /// 호출 주기
+            NULL        
+            /// Timer 주기 : 1000을 기준으로 1초에 1회 (100 = 1초에 10회)
+        );
+        break;
+    case WM_TIMER :
+        /// TIMER : 일정 주기마다 호출하기 위한 기능
+        /// InvalidateRect : 화면을 갱신해주는 함수
+        InvalidateRect(
+            hWnd,       
+            NULL,       /// NULL이라면 전체부분을 갱신 (위치를 저장한다면 그 부분만 갱신)
+            true        /// false인 경우 과거의 값을 남긴 채로 출력
+        );
+
+        break;
+    case WM_KEYDOWN : 
+    {
+        /// wParam : 키보드 입력에 대한 메세지
+        switch (wParam)
+        {
+        case 'A':
+            if(ptPos.x > 0)
+            ptPos.x -= 1;
+            break;
+        case 'D':
+            if(ptPos.x < 15)
+            ptPos.x += 1;
+            break;
+        case 'W':
+            if(ptPos.y > 0)
+            ptPos.y -= 1;
+            break;
+        case 'S':
+            if(ptPos.y < 8)
+            ptPos.y += 1;
+            break;
+        }
+    }
+
     case WM_PAINT:
         {
             PAINTSTRUCT ps;                         /// ps : 그릴 수 있는 도구를 가지고 있는 구조체
             HDC hdc = BeginPaint(hWnd, &ps);        /// 페인트 그리기를 시작하는 지점
                                                     /// DC (Device Context) : 출력을 위한 모든 데이터를 가지는 구조체
-            /// 선 그리기       
-            /// MoveToEx : 선의 시작지점을 정하는 함수
-         
-            //for (int LINEX = 0; LINEX < WINSIZEX; LINEX += 80)
-            //{
-            //    MoveToEx(
-            //        hdc,            /// 핸들
-            //        LINEX,          /// X 좌표
-            //        0,              /// Y 좌표
-            //        NULL            /// 이전 포인터 값
-            //    );
-            //    LineTo(hdc, LINEX, WINSIZEY);
-            //}
-            //for (int LINEY = 0; LINEY < WINSIZEY; LINEY += 80)
-            //{
-            //    MoveToEx(
-            //        hdc,           
-            //        0,             
-            //        LINEY,        
-            //        NULL           
-            //    );
-            //    LineTo(hdc, WINSIZEX, LINEY);
-            //}
+            
             //wstring wstr = L"창을 생성하였습니다.";
-
             //TextOut(
             //    hdc,
             //    10,
@@ -238,8 +305,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             //    wstr.c_str(),   // c_str : C언어 형식으로 문자열을 변형
             //    wstr.Lengthgth()
             //    );
+            int roomsize = WINSIZEY / 9;
+            Draw_Plaid(hdc, roomsize);
+            // Draw_RE(hdc, 50, 50, 50, 10);
+           
+            int ptX = ptPos.x * roomsize;
+            int ptY = ptPos.y * roomsize;
 
-            Draw_RE(hdc, 50, 50, 50, 10);
+            Rectangle(hdc, ptX + 10, ptY + 10, ptX + roomsize - 10, ptY + roomsize - 10);
+            // Rectangle(hdc, rtBox1.left, rtBox1.top, rtBox1.right, rtBox1.bottom);
 
             EndPaint(hWnd, &ps);                    /// 페인트 그리기를 종료하는 지점
         }
@@ -271,6 +345,34 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+
+// H.W 9.30
+void Draw_Plaid(HDC hdc, UINT Interval)
+{
+    /// 선 그리기       
+    /// MoveToEx : 선의 시작지점을 정하는 함수
+    for (int LINEX = 0; LINEX < WINSIZEX; LINEX += Interval)
+    {
+        MoveToEx(
+            hdc,            /// 핸들
+            LINEX,          /// X 좌표
+            0,              /// Y 좌표
+            NULL            /// 이전 포인터 값
+        );
+        LineTo(hdc, LINEX, WINSIZEY);
+    }
+    for (int LINEY = 0; LINEY < WINSIZEY; LINEY += Interval)
+    {
+        MoveToEx(
+            hdc,           
+            0,             
+            LINEY,        
+            NULL           
+        );
+        LineTo(hdc, WINSIZEX, LINEY);
+    }
 }
 
 
