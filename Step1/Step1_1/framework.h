@@ -20,11 +20,19 @@
 
 // 실습에 필요한 파일 작성 (파일 추가)
 
+extern HDC g_Hdc;
+
 // L : w_char 형식으로 반환
 #define PROGRAM_TITLE L"송명근"
 #define WINSIZEX 1280
 #define WINSIZEY 720
 #define UINT unsigned int
+
+// RECT Initialize Macro
+#define RECT_MAKE(x,y,s){ x - s / 2, y - s / 2, x + s / 2, y + s / 2 }
+
+// Rectangle Macro
+#define RECT_DRAW(rt) Rectangle(g_Hdc, rt.left, rt.top, rt.right, rt.bottom)
 
 #include <string>
 using namespace std;

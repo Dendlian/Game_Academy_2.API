@@ -26,6 +26,7 @@ API : 제공하는 함수의 집합체
 #pragma region H.W PRACTICE FUNCTION
 
 void Draw_Plaid(HDC hdc, UINT Interval);
+void Draw_Sentance(HDC hdc, UINT InitX, UINT InitY, wstring wstr);
 void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval);
 
 #pragma endregion
@@ -39,10 +40,25 @@ void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval);
 HINSTANCE hInst;                                        /// 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING] = PROGRAM_TITLE;          /// 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];                    /// 기본 창 클래스 이름입니다.
+HDC g_Hdc;
 
+#pragma region User Global Variable
 /// POINT : X와 Y좌표를 가지고 있는 구조체
-POINT   ptPos {0, 0};   /// 조작할 렉트의 좌표값
-RECT    rtBox1;         /// 조작할 렉트
+POINT   Player_pt {100, 100};   /// 조작할 렉트의 좌표값
+RECT    Player_Rect;         /// 조작할 렉트
+
+POINT pt_Pos{ WINSIZEX / 2, WINSIZEY / 2 };
+RECT  rtBox;
+
+float MoveSpeed = 20.0f;     /// 조작할 렉트의 이동속도
+// 이동 방향 열거형
+enum Move_Dir {MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN};
+Move_Dir moveDir;            /// 이동 방향을 저장할 변수
+
+POINT ptMouse;               /// 마우스의 위치 좌표를 저장할 변수
+bool isPicked = false;       /// 마우스 피킹을 검사할 변수
+#pragma endregion
+
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -96,11 +112,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,                 /// 프로그램
     return (int) msg.wParam;
 }
 
-//
 //  함수: MyRegisterClass()
-//
 //  용도: 창 클래스를 등록합니다.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;   /// WNDCLASSEXW : 윈도우의 정보를 저장하기 위한 구조체
@@ -126,16 +139,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     // ATOM : 반환값을 컴퓨터 프로그램에 넘겨 클래스가 정상적으로 등록됐는지 확인 -> 문제 발생시 프로그램 중단
 }
 
-//
 //   함수: InitInstance(HINSTANCE, int)
-//
 //   용도: 인스턴스 핸들을 저장하고 주 창을 만듭니다.
-//
 //   주석:
-//
 //        이 함수를 통해 인스턴스 핸들을 전역 변수에 저장하고
 //        주 프로그램 창을 만든 다음 표시합니다.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
@@ -209,20 +217,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    ShowWindow(hWnd, nCmdShow);
    /// 업데이트
    UpdateWindow(hWnd);
-
    return TRUE;
 }
 
-//
 //  함수: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
 //  용도: 주 창의 메시지를 처리합니다.
-//
 //  WM_COMMAND  - 애플리케이션 메뉴를 처리합니다.
 //  WM_PAINT    - 주 창을 그립니다.
 //  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
-//
-//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -265,55 +267,91 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             NULL,       /// NULL이라면 전체부분을 갱신 (위치를 저장한다면 그 부분만 갱신)
             true        /// false인 경우 과거의 값을 남긴 채로 출력
         );
+        Player_Rect = RECT_MAKE(Player_pt.x, Player_pt.y, 50);
+        rtBox = RECT_MAKE(pt_Pos.x, pt_Pos.y, 50);
+
+        RECT rt;
+
+        /// IntersectRect : 충돌을 검사하여 충돌이 발생했다면 true를, 아니라면 false를 반환
+        /// 첫번째 인자 : 충돌이 일어난 렉트값을 저장할 렉트의 주소값
+        /// 두번째, 세번째 인자 : 충돌을 검사할 렉트의 주소값
+        if (IntersectRect(&rt, &Player_Rect, &rtBox))
+        {
+            switch (moveDir)
+            {
+            case MOVE_LEFT:
+                pt_Pos.x -= MoveSpeed;
+                break;
+            case MOVE_RIGHT:
+                pt_Pos.x += MoveSpeed;
+                break;
+            case MOVE_UP:
+                pt_Pos.y -= MoveSpeed;
+                break;
+            case MOVE_DOWN:
+                pt_Pos.y += MoveSpeed;
+                break;
+            }
+        }
+
+        if (isPicked) pt_Pos = ptMouse;
 
         break;
+        
     case WM_KEYDOWN : 
     {
         /// wParam : 키보드 입력에 대한 메세지
         switch (wParam)
         {
-        case 'A':
-            if(ptPos.x > 0)
-            ptPos.x -= 1;
+        case 'A': case VK_LEFT :       
+            Player_pt.x -= (Player_Rect.left >= MoveSpeed) ? MoveSpeed : 0;
+            moveDir = MOVE_LEFT;
             break;
-        case 'D':
-            if(ptPos.x < 15)
-            ptPos.x += 1;
+        case 'D': case VK_RIGHT:
+            Player_pt.x += (Player_Rect.right <= WINSIZEX - MoveSpeed) ? MoveSpeed : 0;
+            moveDir = MOVE_RIGHT;
             break;
-        case 'W':
-            if(ptPos.y > 0)
-            ptPos.y -= 1;
+        case 'W': case VK_UP:
+            Player_pt.y -= (Player_Rect.top>= MoveSpeed) ? MoveSpeed : 0;
+            moveDir = MOVE_UP;
             break;
-        case 'S':
-            if(ptPos.y < 8)
-            ptPos.y += 1;
+        case 'S': case VK_DOWN:
+            Player_pt.y += (Player_Rect.bottom <= WINSIZEY - MoveSpeed) ? MoveSpeed : 0;
+            moveDir = MOVE_DOWN;
             break;
         }
     }
 
+    case WM_MOUSEMOVE:
+        /// lparam : 마우스 입력에 대한 메세지
+        ptMouse.x = LOWORD(lParam); // x좌표를 반환
+        ptMouse.y = HIWORD(lParam); // y좌표를 반환
+        break;
+    case WM_LBUTTONDOWN:
+        /// ptInRect(충돌렉트, 좌표) : 좌표가 좌표안에 들어와 있는지 확인
+        /// 들어와 있다면 true를, 아니라면 false를 반환
+        if (PtInRect(&rtBox, ptMouse))
+        {
+            pt_Pos = ptMouse;
+            isPicked = true;
+        }
+        break;
+    case WM_LBUTTONUP:
+        isPicked = false;
+        break;
+
     case WM_PAINT:
         {
             PAINTSTRUCT ps;                         /// ps : 그릴 수 있는 도구를 가지고 있는 구조체
-            HDC hdc = BeginPaint(hWnd, &ps);        /// 페인트 그리기를 시작하는 지점
+            g_Hdc = BeginPaint(hWnd, &ps);        /// 페인트 그리기를 시작하는 지점
                                                     /// DC (Device Context) : 출력을 위한 모든 데이터를 가지는 구조체
+            // int roomsize = WINSIZEY / 9;
+            // Draw_Plaid(g_Hdc, roomsize);
+            // Draw_RE(g_Hdc, 50, 50, 50, 10);
+            // Draw_Sentance(g_Hdc, 10, 10, L"송명근");
             
-            //wstring wstr = L"창을 생성하였습니다.";
-            //TextOut(
-            //    hdc,
-            //    10,
-            //    10,
-            //    wstr.c_str(),   // c_str : C언어 형식으로 문자열을 변형
-            //    wstr.Lengthgth()
-            //    );
-            int roomsize = WINSIZEY / 9;
-            Draw_Plaid(hdc, roomsize);
-            // Draw_RE(hdc, 50, 50, 50, 10);
-           
-            int ptX = ptPos.x * roomsize;
-            int ptY = ptPos.y * roomsize;
-
-            Rectangle(hdc, ptX + 10, ptY + 10, ptX + roomsize - 10, ptY + roomsize - 10);
-            // Rectangle(hdc, rtBox1.left, rtBox1.top, rtBox1.right, rtBox1.bottom);
+            RECT_DRAW(Player_Rect);
+            RECT_DRAW(rtBox);
 
             EndPaint(hWnd, &ps);                    /// 페인트 그리기를 종료하는 지점
         }
@@ -348,7 +386,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
-// H.W 9.30
+// H.W 9.29
 void Draw_Plaid(HDC hdc, UINT Interval)
 {
     /// 선 그리기       
@@ -375,6 +413,17 @@ void Draw_Plaid(HDC hdc, UINT Interval)
     }
 }
 
+// H.W 9.30
+void Draw_Sentance(HDC hdc, UINT InitX, UINT InitY, wstring wstr) 
+{
+    TextOut(
+        hdc,
+        InitX,
+        InitY,
+        wstr.c_str(),   // c_str : C언어 형식으로 문자열을 변형
+        wstr.length()
+    );
+}
 
 // H.W 10.01
 void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval)
