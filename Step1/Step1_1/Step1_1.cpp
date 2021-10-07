@@ -40,9 +40,11 @@ void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval);
 HINSTANCE hInst;                                        /// 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING] = PROGRAM_TITLE;          /// 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];                    /// 기본 창 클래스 이름입니다.
-HDC g_Hdc;
 
 #pragma region User Global Variable
+HWND g_hwnd;
+HDC g_Hdc;
+
 /// POINT : X와 Y좌표를 가지고 있는 구조체
 POINT   Player_pt {100, 100};   /// 조작할 렉트의 좌표값
 RECT    Player_Rect;         /// 조작할 렉트
@@ -161,7 +163,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    int nWinPosY = nResolutionY / 2 - WINSIZEY / 2;
 #pragma endregion
 
-
    /*
    ==NOTE==
     // 콘솔창이 아닌 윈도우 창을 생성
@@ -189,6 +190,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    {
       return FALSE;
    }
+
+   g_hwnd = hWnd;
 
 #pragma region 좌표 나누기
    /// 실제 창 사이즈를 rt에 보관

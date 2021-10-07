@@ -5,7 +5,6 @@
    - 프로젝트의 특정 파일이 들어있는 헤더 파일
 */
 
-#pragma once
 
 #include "targetver.h"
 #define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
@@ -20,11 +19,12 @@
 
 // 실습에 필요한 파일 작성 (파일 추가)
 
+extern HWND g_hwnd;
 extern HDC g_Hdc;
 
 // L : w_char 형식으로 반환
 #define PROGRAM_TITLE L"송명근"
-#define WINSIZEX 1280
+#define WINSIZEX 640
 #define WINSIZEY 720
 #define UINT unsigned int
 
