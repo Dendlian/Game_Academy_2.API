@@ -37,9 +37,9 @@ void Draw_RE(HDC hdc, UINT InitX, UINT InitY, UINT Length, UINT Interval);
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
-HINSTANCE hInst;                                        /// 현재 인스턴스입니다.
-WCHAR szTitle[MAX_LOADSTRING] = PROGRAM_TITLE;          /// 제목 표시줄 텍스트입니다.
-WCHAR szWindowClass[MAX_LOADSTRING];                    /// 기본 창 클래스 이름입니다.
+HINSTANCE hInst;                                        /// 현재 인스턴스
+WCHAR szTitle[MAX_LOADSTRING] = PROGRAM_TITLE;          /// 제목 표시줄 텍스트
+WCHAR szWindowClass[MAX_LOADSTRING];                    /// 기본 창 클래스 이름
 
 #pragma region User Global Variable
 HWND g_hwnd;
