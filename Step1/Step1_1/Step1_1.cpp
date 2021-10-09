@@ -215,7 +215,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    ); /// AdjustWindowRect에서 설정한 창을 다시 그리기
 #pragma endregion
 
-
    /// 윈도우 창 출력
    ShowWindow(hWnd, nCmdShow);
    /// 업데이트
