@@ -84,6 +84,18 @@ void MainGame::Update()
 			_Object->GetBox().erase(iter);
 			break;
 		}
+		else if (IntersectRect(&rt, &_Player->GetPlayerBox(4), &rtIter))
+		{
+			Score = 0;
+			_Object->GetBox().erase(iter);
+			break;
+		}
+		else if (IntersectRect(&rt, &_Player->GetPlayerBox(5), &rtIter))
+		{
+			Score = 0;
+			_Object->GetBox().erase(iter);
+			break;
+		}
 	}
 }
 
@@ -92,11 +104,11 @@ void MainGame::Render()
 	PAINTSTRUCT ps;
 	g_Hdc = BeginPaint(g_hWnd, &ps);
 
+	MoveToEx(g_Hdc, 0, WINSIZEY - 85, NULL);
+	LineTo(g_Hdc, WINSIZEX, WINSIZEY - 85);
+
 	_Object->Render();
 	_Player->Render();
-	
-	MoveToEx( g_Hdc, 0, WINSIZEY - 75, NULL);
-	LineTo(g_Hdc, WINSIZEX, WINSIZEY - 75);
 
 	string str = "Score";
 	TextOutA(g_Hdc, 10, 30, str.c_str(), str.length());

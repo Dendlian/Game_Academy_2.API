@@ -11,7 +11,7 @@ private:
 	class Object* _Object;
 
 	int Score;
-	int ScoreDelay;		//
+	int ScoreDelay;	
 	int Level;
 public:
 	MainGame();

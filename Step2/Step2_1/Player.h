@@ -13,7 +13,7 @@ class Player : public GameNode
 {
 private:
 	POINT			Player_pt;
-	RECT			Player_Rect[4];
+	RECT			Player_Rect[6];
 	float			MoveSpeed;
 	KeyManager*		keyManager;
 	isJumping		isjumping;
