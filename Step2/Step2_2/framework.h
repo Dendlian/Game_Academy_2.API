@@ -20,6 +20,7 @@ extern POINT pt_Mouse;
 #define UINT unsigned int
 #define RECT_MAKE(x,y,s){ x - s / 2, y - s / 2, x + s / 2, y + s / 2 }
 #define RECT_DRAW(rt) Rectangle(g_Hdc, rt.left, rt.top, rt.right, rt.bottom)
+#define ELLI_DRAW(rt) Ellipse(g_Hdc, rt.left, rt.top, rt.right, rt.bottom)
 
 #include <string>
 #include <vector>

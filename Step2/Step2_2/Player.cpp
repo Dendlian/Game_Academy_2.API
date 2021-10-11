@@ -19,8 +19,7 @@ void Player::Update()
 		Player_pt.y -= (Player_Rect.top >= MoveSpeed) ? MoveSpeed : 0;
 	else if (keyManager->IsStayKeyDown(VK_DOWN) || keyManager->IsOnceKeyDown('S'))
 		Player_pt.y += (Player_Rect.bottom <= WINSIZEY - MoveSpeed) ? MoveSpeed : 0;
-
-	Player_Rect = RECT_MAKE(Player_pt.x, Player_pt.y, 30);
+	Player_Rect = RECT_MAKE(Player_pt.x, Player_pt.y, 15);
 }
 
 void Player::Render()
