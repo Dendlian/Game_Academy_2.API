@@ -30,7 +30,7 @@ void MainGame::Init()
 
 void MainGame::Update()
 {
-	InvalidateRect(g_hWnd, NULL, false);
+	InvalidateRect(g_hWnd, NULL, false);							// buffer step 4
 	Level = Score / 100 + 1;
 	_Object->SetLevel(Level);
 
@@ -126,14 +126,12 @@ void MainGame::Render()
 	PAINTSTRUCT ps;
 	HBRUSH Brush, oBrush;
 
-	HDC hdc = BeginPaint(g_hWnd, &ps);
-
-	PatBlt(g_Hdc, 0, 0, WINSIZEX, WINSIZEY, WHITENESS);
+	HDC hdc = BeginPaint(g_hWnd, &ps);								// buffer step 1
+	PatBlt(g_Hdc, 0, 0, WINSIZEX, WINSIZEY, WHITENESS);				// buffer step 2
 
 	_Object->Render();
 
 	Brush = CreateSolidBrush(RGB(200, 0, 0));
-
 	oBrush = (HBRUSH)SelectObject(g_Hdc, Brush);
 	_Player->Render();
 	SelectObject(g_Hdc, oBrush);
@@ -153,7 +151,7 @@ void MainGame::Render()
 	str = to_string(Level);
 	TextOutA(g_Hdc, 50, 10, str.c_str(), str.length());
 
-	BitBlt(hdc, 0, 0, WINSIZEX, WINSIZEY, g_Hdc, 0, 0, SRCCOPY);
+	BitBlt(hdc, 0, 0, WINSIZEX, WINSIZEY, g_Hdc, 0, 0, SRCCOPY);	 // buffer step 3
 
 	EndPaint(g_hWnd, &ps);
 }
