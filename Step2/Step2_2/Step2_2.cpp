@@ -1,6 +1,14 @@
 ﻿#include "framework.h"
 #include "Step2_2.h"
 
+/*
+ // Buffer
+   - 컴퓨터가 어떠한 데이터를 주고 받을 때 둘 사이의 전송 속도를 해결하기 위해 전송한 정보를 임시로 저장하는 공간
+   - 화면에 그려지는 버퍼에 바로 렌더(송출)를 할 경우 버퍼가 지워지는 순간, 또는 버퍼가 전체가 다 그려지기 전에 화면에 그려질 경우 덜 그려진 부분이 화면에서
+   잠깐 지워지는 상태가 되어 깜빡이는 것 처럼 보이는 현상이 발생
+
+   - 이러한 문제를 해결하기 위해 백 버퍼를 생성하여 백 버퍼에 모든 내용을 저장 후 프론트 버퍼에 넘겨 화면에 랜더하는 방식을 사용
+*/
 
 #define MAX_LOADSTRING 100
 
@@ -38,6 +46,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_STEP22));
+
+    HDC hdc = GetDC(g_hWnd);
+    g_Hdc = CreateCompatibleDC(hdc);
+    HBITMAP hBitMap = CreateCompatibleBitmap(hdc, WINSIZEX, WINSIZEY);
+    // 비트맵 : 버퍼에 존재하는 데이터를 픽셀 단위로 찍어내어 보여주는 일종의 출력방식
+    SelectObject(g_Hdc, hBitMap);
 
     g_MainGame = new MainGame;
     if (g_MainGame)g_MainGame->Init();

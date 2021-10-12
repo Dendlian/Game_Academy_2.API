@@ -1,6 +1,7 @@
 #pragma once
 #include "GameManager.h"
 #include <bitset>
+/// bistset : bit 연산을 담당하여 bool type을 담고 있는 자료구조 (컨테이너)
 
 using namespace std;
 
@@ -24,5 +25,7 @@ public:
 
 	// 키를 누르고 있는지를 검사
 	bool IsStayKeyDown(int key);
+
+	bool IsKeyToggle(int Key);
 };
 
