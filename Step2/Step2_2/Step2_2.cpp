@@ -1,5 +1,7 @@
 ﻿#include "framework.h"
 #include "Step2_2.h"
+// 컴파일 : 컴퓨터가 소스코드를 읽을 수 있도록 이진 코드로 바꾸는 과정
+// 디버그 : 사용자가 작성한 소스 코드의 버그를 잡는 과정
 
 /*
  // Buffer
@@ -39,34 +41,67 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     LoadStringW(hInstance, IDC_STEP22, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
-
-
     if (!InitInstance(hInstance, nCmdShow))
     {
         return FALSE;
     }
-
+    
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_STEP22));
 
 #pragma region Back Buffer 생성
     HDC hdc = GetDC(g_hWnd);
     g_Hdc = CreateCompatibleDC(hdc);
-    HBITMAP hBitMap = CreateCompatibleBitmap(hdc, WINSIZEX, WINSIZEY);
     // 비트맵 : 버퍼에 존재하는 데이터를 픽셀 단위로 찍어내어 보여주는 일종의 출력방식
+    HBITMAP hBitMap = CreateCompatibleBitmap(hdc, WINSIZEX, WINSIZEY);
     SelectObject(g_Hdc, hBitMap);
 #pragma endregion
 
     g_MainGame = new MainGame;
     if (g_MainGame)g_MainGame->Init();
-
+    
     MSG msg;
+   
+#pragma region GetMessage
+    // GetMessage : 메세지가 없다면 대기, 있다면 true, 반환 종료 메세지가 있다면 false를 반환
+    // GetMessage는 업데이트를 하기 위해서 WM_TIMER를 사용 
+    // 타이머 메세지는 모든 메세지 중에서 가장 낮은 우선순위
+    // 타이머가 업데이트 할 수 있는 최대 속도 : 0.01초
+    // 타이머의 한계를 해결하기 위해 PeekMessage 사용
 
-    while (GetMessage(&msg, nullptr, 0, 0))
+    // PeekMessage : 메세지가 있을 경우 true를, 없을 경우 false를 반환
+    //               대기시간 존재 X
+   
+    // 기본 메세지 루프
+    //while (GetMessage(&msg, nullptr, 0, 0))
+    //{
+    //    // 키보드 메세지를 윈도우 메세지로 변경하여 액셀러레이터가 동작할 수 있도록 하는 함수
+    //    if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+    //    {
+    //        TranslateMessage(&msg);     // WndProc로 전달
+    //        DispatchMessage(&msg);
+    //    }
+    //}
+#pragma endregion
+
+
+    while (true)
     {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        // 키보드 메세지를 윈도우 메세지로 변경하여 액셀러레이터가 동작할 수 있도록 하는 함수
+        if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
         {
-            TranslateMessage(&msg);
+            // 들어오는 메세지가 WM_QUIT이라면 종료
+            if (msg.message == WM_QUIT) break;
+           
+            TranslateMessage(&msg);     // WndProc로 전달
             DispatchMessage(&msg);
+        }
+        else
+        {
+            if (g_MainGame)
+            {
+                g_MainGame->Update();
+                g_MainGame->Render();
+            }
         }
     }
 
@@ -120,14 +155,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
         hInstance,
         nullptr
     );
-
     if (!hWnd)
     {
         return FALSE;
     }
-
     g_hWnd = hWnd;
-
 #pragma region 좌표 나누기
 
     RECT rt = { nWinPosX, nWinPosY, nWinPosX + WINSIZEX, nWinPosY + WINSIZEY };
@@ -173,20 +205,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
     }
     break;
-
     case WM_CREATE:
-        SetTimer(hWnd, 1, 10, NULL);
-        srand(time(NULL));
         break;
     case WM_TIMER:
-        if (g_MainGame)g_MainGame->Update();
         break;
     case WM_MOUSEMOVE:
         pt_Mouse.x = LOWORD(lParam);
         pt_Mouse.y = HIWORD(lParam);
-        break;
-    case WM_PAINT:
-        if (g_MainGame)g_MainGame->Render();
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
