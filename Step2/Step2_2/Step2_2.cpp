@@ -13,7 +13,7 @@
    - 이러한 문제를 해결하기 위해 백 버퍼를 생성하여 백 버퍼에 모든 내용을 저장 후 프론트 버퍼에 넘겨 화면에 랜더하는 방식을 사용
 */
 
-#define MAX_LOADSTRING 100
+#define MAX_LOADSTRING 100 
 
 HINSTANCE hInst;
 WCHAR szTitle[MAX_LOADSTRING] = PROGRAM_TITLE;
