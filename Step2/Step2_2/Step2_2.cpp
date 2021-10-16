@@ -17,7 +17,7 @@
 
 HINSTANCE hInst;
 WCHAR szTitle[MAX_LOADSTRING] = PROGRAM_TITLE;
-WCHAR szWindowClass[MAX_LOADSTRING];
+WCHAR szWindowClass[MAX_LOADSTRING]; 
 
 #pragma region User Global Variable
 HWND g_hWnd;
