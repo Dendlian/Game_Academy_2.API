@@ -19,7 +19,7 @@ HINSTANCE hInst;
 WCHAR szTitle[MAX_LOADSTRING] = PROGRAM_TITLE;
 WCHAR szWindowClass[MAX_LOADSTRING]; 
 
-#pragma region User Global Variable
+#pragma region User Global Variable 
 HWND g_hWnd;
 HDC g_Hdc;
 POINT pt_Mouse;
