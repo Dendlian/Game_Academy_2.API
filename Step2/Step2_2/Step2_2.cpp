@@ -181,7 +181,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 #pragma endregion
 
     ShowWindow(hWnd, nCmdShow);
-    UpdateWindow(hWnd);     // 윈도우 창을 업데이트 하며 다시 그리기 : PAINT 호출
+    UpdateWindow(hWnd);        // 윈도우 창을 업데이트 하며 다시 그리기 : PAINT 호출
     return TRUE;
 }
 
