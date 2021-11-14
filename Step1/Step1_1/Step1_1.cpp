@@ -5,16 +5,21 @@ Window : 운영체제 (Os, Operation System)
 API : 제공하는 함수의 집합체
 윈도우가 제공한 함수의 집합체
 
- // Handle : 운영체제 내부에 있는 리소스의 주소를 정수로 치환한 값
  // Resource : 각종 하드웨어 장치 또는 저장장치등에 들어있는 데이터 재료
- // HINSTANCE : 각종 하드웨어 장치 또는 저장장치등에 들어있는 데이터 재료
  // 프로세서 : 현재 실행되고 있는 프로그램
 
+ // HINSTANCE 
+   - 프로그램의 Handle을 의미, 사용자가 만드는 것이 아닌 프로그램이 시작할 때 운영체제가 제공
+   - Handle + Instance : 윈도우 운영체제에서 실행되는 프로그램을 구별하기 위한 ID값
+   - wWinMain()에서 한 번 들어오는 값으로 값을 저장해서 사용
+   // Handle : 운영체제 내부에 있는 리소스의 주소를 정수로 치환한 값
+   // Instance : 객체 지향 프로그래밍에서 인스턴스는 해당 클래스의 구조로 컴퓨터 저장공간에서 할당된 실체
+
  // w_char
-   - string str = "단어"; ("" : char[])
+   - L"문자열"
  // w_char (wide character) vs char
-   - w_char     2       UNICODE
-   - char       1       ASCII
+   - w_char     2byte       UNICODE
+   - char       1byte       ASCII
 
 */
 
@@ -47,7 +52,7 @@ HDC g_Hdc;
 
 /// POINT : X와 Y좌표를 가지고 있는 구조체
 POINT   Player_pt {100, 100};   /// 조작할 렉트의 좌표값
-RECT    Player_Rect;         /// 조작할 렉트
+RECT    Player_Rect;            /// 조작할 렉트
 
 POINT pt_Pos{ WINSIZEX / 2, WINSIZEY / 2 };
 RECT  rtBox;
@@ -345,7 +350,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_PAINT:
         {
             PAINTSTRUCT ps;                         /// ps : 그릴 수 있는 도구를 가지고 있는 구조체
-            g_Hdc = BeginPaint(hWnd, &ps);        /// 페인트 그리기를 시작하는 지점
+            g_Hdc = BeginPaint(hWnd, &ps);          /// 페인트 그리기를 시작하는 지점
                                                     /// DC (Device Context) : 출력을 위한 모든 데이터를 가지는 구조체
             // int roomsize = WINSIZEY / 9;
             // Draw_Plaid(g_Hdc, roomsize);
